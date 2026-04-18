@@ -12,6 +12,25 @@ export interface QuizQuestion {
   correctOptionIndex: number; // Index of the correct option in the options array
 }
 
+export interface Project {
+  id?: string;
+  title: string;
+  description: string;
+  instructions: string;
+  order: number;
+  createdAt: Timestamp | string;
+  updatedAt: Timestamp | string;
+}
+
+export interface Module {
+  id?: string;
+  title: string;
+  description: string;
+  order: number;
+  lessons: Lesson[];
+  projects: Project[];
+}
+
 export interface Course {
   id?: string; // Firestore document ID
   title: string;
@@ -29,6 +48,7 @@ export interface Course {
   enrollmentCount?: number;
   averageRating?: number;
   ratingCount?: number; // New: to store the number of ratings
+  modules?: Module[];
 }
 
 export interface Lesson {

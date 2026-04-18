@@ -14,7 +14,7 @@ import { collection, getDocs, doc, getDoc, query } from "firebase/firestore";
 import type { User as FirebaseAuthUser } from 'firebase/auth';
 import type { Course, UserEnrolledCourse } from "@/types/course";
 import CourseCard, { type CourseCardProps } from "@/components/course/CourseCard";
-import { BookOpen, LogIn, Search, AlertCircle, LayoutDashboard } from "lucide-react";
+import { BookOpen, LogIn, Search, AlertCircle, LayoutDashboard, Code, TrendingUp } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function StudentDashboardPage() {
@@ -208,34 +208,59 @@ export default function StudentDashboardPage() {
       </section>
       
       {/* Placeholder for Progress Tracking - Future Implementation */}
-      <section>
-        <Card className="shadow-lg">
-          <CardHeader>
-            <CardTitle>Your Progress</CardTitle>
-            <CardDescription>Track your learning achievements.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="border-2 border-dashed border-border rounded-md p-12 text-center text-muted-foreground">
-              <LayoutDashboard className="mx-auto h-16 w-16 mb-4" /> {/* Changed icon */}
-              <p className="text-xl mb-2">Course progress tracking is coming soon!</p>
-              <p>You'll be able to see how far you've come in each course.</p>
-            </div>
-          </CardContent>
-        </Card>
-      </section>
+      {/* Active Projects & Progress Overview */}
+      <div className="grid md:grid-cols-2 gap-8">
+        <section>
+          <Card className="shadow-lg h-full">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Code className="h-5 w-5 text-primary" />
+                Active Projects
+              </CardTitle>
+              <CardDescription>Build real projects to apply what you've learned.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="border-2 border-dashed border-border rounded-md p-8 text-center text-muted-foreground">
+                <p className="mb-2">No active projects at the moment.</p>
+                <p className="text-sm">Start a course module to unlock projects.</p>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
 
-      {/* Placeholder for Recent Activity - Future Implementation */}
+        <section>
+          <Card className="shadow-lg h-full">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-primary" />
+                Learning Progress
+              </CardTitle>
+              <CardDescription>Track your growth and skill improvements.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="border-2 border-dashed border-border rounded-md p-8 text-center text-muted-foreground">
+                <p className="mb-2">Progress tracking is initializing.</p>
+                <p className="text-sm">Complete lessons and resubmit projects to see your growth trends.</p>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+      </div>
+
+      {/* Recent Activity */}
       <section>
         <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
-            <CardDescription>Stay updated with your learning interactions.</CardDescription>
+            <CardTitle className="flex items-center gap-2">
+              <BookOpen className="h-5 w-5 text-primary" />
+              Recent Activity
+            </CardTitle>
+            <CardDescription>Stay updated with your latest learning milestones.</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="border-2 border-dashed border-border rounded-md p-12 text-center text-muted-foreground">
-              <BookOpen className="mx-auto h-16 w-16 mb-4" /> {/* Changed icon */}
-              <p className="text-xl mb-2">Recent activity feed is coming soon!</p>
-              <p>You'll see updates on new lessons, discussions, and more.</p>
+              <p className="text-xl mb-2">Activity feed is coming soon!</p>
+              <p>You'll see updates on feedback, course completions, and more.</p>
             </div>
           </CardContent>
         </Card>
