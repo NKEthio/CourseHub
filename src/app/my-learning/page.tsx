@@ -8,30 +8,20 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { onAuthStateChanged } from "@/lib/firebase/auth";
-import { db, auth } from "@/lib/firebase/firebase";
-import { collection, getDocs, doc, getDoc, query } from "firebase/firestore";
-import type { User as FirebaseAuthUser } from 'firebase/auth';
+import { db } from "@/lib/firebase/firebase";
+import { collection, getDocs, doc, getDoc } from "firebase/firestore";
 import type { Course, UserEnrolledCourse } from "@/types/course";
 import CourseCard, { type CourseCardProps } from "@/components/course/CourseCard";
-import { BookOpen, LogIn, Search, AlertCircle, LayoutDashboard, Code, TrendingUp } from "lucide-react";
+import { BookOpen, LogIn, Search, AlertCircle, Code, TrendingUp } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useAuth } from "@/components/auth-provider";
 
 export default function StudentDashboardPage() {
   const router = useRouter();
-  const [currentUser, setCurrentUser] = React.useState<FirebaseAuthUser | null>(null);
-  const [isLoadingAuth, setIsLoadingAuth] = React.useState(true);
+  const { user: currentUser, isLoading: isLoadingAuth } = useAuth();
   const [enrolledCourses, setEnrolledCourses] = React.useState<CourseCardProps[]>([]);
   const [isLoadingCourses, setIsLoadingCourses] = React.useState(false);
   const [errorCourses, setErrorCourses] = React.useState<string | null>(null);
-
-  React.useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setCurrentUser(user);
-      setIsLoadingAuth(false);
-    });
-    return () => unsubscribe();
-  }, []);
 
   React.useEffect(() => {
     if (!currentUser) {
@@ -40,6 +30,7 @@ export default function StudentDashboardPage() {
     }
 
     const fetchEnrolledCourses = async () => {
+      if (!db) return;
       setIsLoadingCourses(true);
       setErrorCourses(null);
       try {
@@ -54,7 +45,7 @@ export default function StudentDashboardPage() {
 
         const coursePromises = enrolledSnapshot.docs.map(async (enrollmentDoc) => {
           const enrolledData = enrollmentDoc.data() as UserEnrolledCourse;
-          const courseDocRef = doc(db, "courses", enrolledData.courseId);
+          const courseDocRef = doc(db!, "courses", enrolledData.courseId);
           const courseDocSnap = await getDoc(courseDocRef);
           if (courseDocSnap.exists()) {
             const courseData = courseDocSnap.data() as Course;

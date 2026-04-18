@@ -6,6 +6,7 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/theme-provider";
+import { AuthProvider } from "@/components/auth-provider";
 import FirebaseErrorListener from '@/components/FirebaseErrorListener';
 
 const geistSans = Geist({
@@ -32,13 +33,15 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} flex flex-col min-h-screen`}>
         <ThemeProvider>
-          <Header />
-          <main className="flex-grow container mx-auto px-4 py-8 animate-fade-in">
-            {children}
-          </main>
-          <Footer />
-          <Toaster />
-          <FirebaseErrorListener />
+          <AuthProvider>
+            <Header />
+            <main className="flex-grow container mx-auto px-4 py-8 animate-fade-in">
+              {children}
+            </main>
+            <Footer />
+            <Toaster />
+            <FirebaseErrorListener />
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -26,16 +26,14 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { onAuthStateChanged, getUserProfile, updateUserDisplayName } from "@/lib/firebase/auth";
+import { onAuthStateChanged, getUserProfile, updateUserDisplayName, type UserRole } from "@/lib/firebase/auth";
 import type { User as FirebaseAuthUser } from 'firebase/auth';
-import type { UserRole } from "@/lib/firebase/auth";
 import { Loader2, User, Mail, ShieldCheck, ArrowLeft } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
 
 interface AppUser extends FirebaseAuthUser {
-  role?: UserRole;
-  displayName?: string | null;
+  role: UserRole;
 }
 
 const settingsSchema = z.object({
@@ -65,19 +63,16 @@ export default function SettingsPage() {
         const profile = await getUserProfile(firebaseUser.uid);
         if (profile) {
           setCurrentUser({ 
-            uid: firebaseUser.uid, 
-            email: firebaseUser.email, 
-            ...profile 
-          });
+            ...firebaseUser,
+            role: profile.role,
+          } as AppUser);
           form.reset({ displayName: profile.displayName || "" });
         } else {
           // Fallback for safety, though profile should exist
           setCurrentUser({
-            uid: firebaseUser.uid,
-            email: firebaseUser.email,
-            displayName: firebaseUser.displayName || "",
+            ...firebaseUser,
             role: 'student'
-          });
+          } as AppUser);
           form.reset({ displayName: firebaseUser.displayName || "" });
         }
       } else {
@@ -185,9 +180,9 @@ export default function SettingsPage() {
                     disabled
                     className="bg-muted/50"
                   />
-                   <FormDescription>
+                   <p className="text-[0.8rem] text-muted-foreground">
                     Email address cannot be changed here.
-                  </FormDescription>
+                  </p>
               </FormItem>
 
               <FormItem>

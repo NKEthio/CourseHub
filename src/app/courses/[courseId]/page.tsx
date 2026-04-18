@@ -8,7 +8,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { doc, getDoc, collection, query, orderBy, getDocs, Timestamp, updateDoc, setDoc, increment, serverTimestamp, where, writeBatch } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase/firebase";
-import type { Course, Lesson, Review } from "@/types/course";
+import type { Course, Lesson, Review, Project } from "@/types/course";
+import dynamic from "next/dynamic";
+const ProjectSubmission = dynamic(() => import("@/components/project/ProjectSubmission"), { ssr: false });
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -379,6 +381,38 @@ export default function CourseDetailPage() {
                               <Link href={lesson.videoUrl} target="_blank" rel="noopener noreferrer"> <Film className="mr-2 h-4 w-4" /> Watch Lesson Video </Link>
                             </Button>
                           </div>
+                        )}
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                  {/* New: Project Section */}
+                  {course.modules?.flatMap(m => m.projects).map((project, index) => (
+                    <AccordionItem value={`project-${index}`} key={project.id || index}>
+                       <AccordionTrigger className="hover:no-underline border-t">
+                        <div className="flex items-center gap-3">
+                           <span className="flex items-center justify-center h-6 w-6 rounded-full bg-accent text-accent-foreground text-xs font-semibold"> P </span>
+                          <span className="text-base font-medium">{project.title}</span>
+                          <Badge variant="outline" className="ml-2">Project</Badge>
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent className="space-y-6 pl-12 pr-4 pb-4">
+                        <div className="prose dark:prose-invert max-w-none">
+                          <p>{project.description}</p>
+                          <h4>Instructions</h4>
+                          <p>{project.instructions}</p>
+                        </div>
+                        {isEnrolled ? (
+                          <ProjectSubmission
+                            projectId={project.id || `p-${index}`}
+                            projectTitle={project.title}
+                            projectInstructions={project.instructions}
+                          />
+                        ) : (
+                          <Alert>
+                            <Info className="h-4 w-4" />
+                            <AlertTitle>Enrollment Required</AlertTitle>
+                            <AlertDescription>Please enroll in the course to submit this project and receive AI feedback.</AlertDescription>
+                          </Alert>
                         )}
                       </AccordionContent>
                     </AccordionItem>

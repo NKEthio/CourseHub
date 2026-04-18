@@ -9,16 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { onAuthStateChanged, getUserProfile } from "@/lib/firebase/auth";
-import type { User as FirebaseAuthUser } from 'firebase/auth';
-import type { UserRole } from "@/lib/firebase/auth";
+import { onAuthStateChanged, getUserProfile, type AppUser } from "@/lib/firebase/auth";
 import { User, Mail, ShieldCheck, Edit, LogIn, Briefcase, School, LayoutDashboard } from "lucide-react";
-
-interface AppUser extends FirebaseAuthUser {
-  role?: UserRole;
-  displayName?: string | null;
-  photoURL?: string | null;
-}
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -31,20 +23,15 @@ export default function ProfilePage() {
         const profile = await getUserProfile(firebaseUser.uid);
         if (profile) {
           setCurrentUser({ 
-            uid: firebaseUser.uid,
-            email: firebaseUser.email,
-            photoURL: firebaseUser.photoURL,
-            ...profile 
-          });
+            ...firebaseUser,
+            role: profile.role,
+          } as AppUser);
         } else {
           // Fallback if Firestore profile somehow fails, use Auth data
           setCurrentUser({
-            uid: firebaseUser.uid,
-            email: firebaseUser.email,
-            displayName: firebaseUser.displayName,
-            photoURL: firebaseUser.photoURL,
+            ...firebaseUser,
             role: 'student' // Default role if not found
-          });
+          } as AppUser);
         }
       } else {
         router.push("/auth/login"); // Redirect if not logged in

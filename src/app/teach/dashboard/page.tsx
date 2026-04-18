@@ -7,23 +7,14 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart, BookCopy, DollarSign, Edit, Loader2, MessageSquare, PlusCircle, Settings, Users, AlertCircle, ClipboardList, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
-import { onAuthStateChanged, getUserProfile, type UserRole } from "@/lib/firebase/auth";
+import { onAuthStateChanged, getUserProfile, type UserRole, type AppUser } from "@/lib/firebase/auth";
 import { db } from "@/lib/firebase/firebase";
 import { collection, query, where, getDocs, Timestamp } from "firebase/firestore";
 import type { Course } from "@/types/course";
-import type { User as FirebaseAuthUser } from 'firebase/auth';
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-
-interface AppUser {
-  uid: string;
-  email: string | null;
-  role?: UserRole;
-  displayName?: string | null;
-  photoURL?: string | null;
-}
 
 interface CourseWithId extends Course {
   id: string;

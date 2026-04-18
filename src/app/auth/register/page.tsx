@@ -36,7 +36,7 @@ const registerSchema = z.object({
   email: z.string().email({ message: "Invalid email address" }),
   password: z.string().min(6, { message: "Password must be at least 6 characters" }),
   confirmPassword: z.string(),
-  role: z.enum(['student', 'teacher'], { required_error: "Please select a role" }),
+  role: z.enum(['student', 'teacher', 'parent'], { required_error: "Please select a role" }),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"], // path of error
@@ -193,6 +193,14 @@ export default function RegisterPage() {
                           </FormControl>
                           <FormLabel className="font-normal">
                             Teacher
+                          </FormLabel>
+                        </FormItem>
+                        <FormItem className="flex items-center space-x-3 space-y-0">
+                          <FormControl>
+                            <RadioGroupItem value="parent" />
+                          </FormControl>
+                          <FormLabel className="font-normal">
+                            Parent
                           </FormLabel>
                         </FormItem>
                       </RadioGroup>

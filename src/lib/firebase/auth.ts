@@ -16,6 +16,8 @@ import { FirestorePermissionError } from '@/firebase/errors';
 
 export type UserRole = 'student' | 'teacher' | 'parent' | 'admin';
 
+import type { User as FirebaseAuthUser } from 'firebase/auth';
+
 export interface UserProfile {
   uid: string;
   email: string | null;
@@ -23,6 +25,10 @@ export interface UserProfile {
   role: UserRole;
   photoURL?: string | null;
   createdAt?: Timestamp;
+}
+
+export interface AppUser extends FirebaseAuthUser {
+  role: UserRole;
 }
 
 export async function signUpWithEmail(

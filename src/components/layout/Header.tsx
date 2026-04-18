@@ -17,53 +17,18 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import * as React from 'react';
-import { onAuthStateChanged, signOutUser, getUserProfile, type UserRole } from '@/lib/firebase/auth';
-import type { User as FirebaseAuthUser } from 'firebase/auth';
+import { signOutUser } from '@/lib/firebase/auth';
 import { useToast } from "@/hooks/use-toast";
 import { useTheme } from '@/components/theme-provider'; // Import useTheme
-
-
-interface AppUser extends FirebaseAuthUser {
-  role?: UserRole;
-  photoURL?: string | null;
-}
+import { useAuth } from '@/components/auth-provider';
 
 export default function Header() {
   const pathname = usePathname();
   const router = useRouter();
   const { toast } = useToast();
-  const [currentUser, setCurrentUser] = React.useState<AppUser | null>(null);
-  const [isLoading, setIsLoading] = React.useState(true);
+  const { user: currentUser, isLoading } = useAuth();
   const { theme, setTheme } = useTheme();
   const [searchTerm, setSearchTerm] = React.useState("");
-
-  React.useEffect(() => {
-    const unsubscribe = onAuthStateChanged(async (firebaseUser) => {
-      setIsLoading(true);
-      if (firebaseUser) {
-        const profile = await getUserProfile(firebaseUser.uid);
-        if (profile) {
-          setCurrentUser({
-            ...firebaseUser,
-            uid: profile.uid,
-            email: profile.email || firebaseUser.email,
-            displayName: profile.displayName || firebaseUser.displayName,
-            photoURL: profile.photoURL || firebaseUser.photoURL,
-            role: profile.role,
-          } as AppUser);
-        } else {
-           setCurrentUser({
-            ...firebaseUser,
-            role: 'student',
-          } as AppUser);
-        }
-      } else {
-        setCurrentUser(null);
-      }
-      setIsLoading(false);
-    });
-    return () => unsubscribe();
-  }, []);
 
   const handleLogout = async () => {
     const { error } = await signOutUser();
@@ -78,7 +43,6 @@ export default function Header() {
         title: "Logged Out",
         description: "You have been successfully logged out.",
       });
-      setCurrentUser(null);
       router.push('/');
     }
   };
@@ -103,6 +67,8 @@ export default function Header() {
       dashboardLinkConfig = { href: '/admin', label: 'Admin Dashboard', icon: LayoutDashboard };
     } else if (currentUser.role === 'teacher') {
       dashboardLinkConfig = { href: '/teach/dashboard', label: 'Teacher Dashboard', icon: LayoutDashboard };
+    } else if (currentUser.role === 'parent') {
+      dashboardLinkConfig = { href: '/parent/dashboard', label: 'Parent Dashboard', icon: LayoutDashboard };
     }
 
     finalNavLinks = [
@@ -223,6 +189,13 @@ export default function Header() {
                   <DropdownMenuItem asChild>
                     <Link href="/teach/dashboard" className="flex items-center w-full">
                      <LayoutDashboard className="mr-2 h-4 w-4" /> Teacher Dashboard
+                    </Link>
+                  </DropdownMenuItem>
+                )}
+                {currentUser.role === 'parent' && (
+                  <DropdownMenuItem asChild>
+                    <Link href="/parent/dashboard" className="flex items-center w-full">
+                     <LayoutDashboard className="mr-2 h-4 w-4" /> Parent Dashboard
                     </Link>
                   </DropdownMenuItem>
                 )}
