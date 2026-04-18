@@ -1,0 +1,241 @@
+📘 Product Requirements Document (PRD)
+Product Name: Adaptive AI Learning Platform
+1. Problem Definition
+
+Right now, most education systems optimize for scores, not understanding or growth.
+
+Students:
+
+memorize instead of building
+don’t get timely feedback
+don’t know what to improve
+
+Parents:
+
+only see grades, not actual progress
+
+Teachers:
+
+cannot scale personalized feedback
+
+So the real problem is:
+
+there is no system that continuously tracks and improves a student’s learning journey through feedback and real work
+
+2. Product Vision
+
+Create a platform where:
+
+students learn by building real projects
+AI + teachers provide continuous feedback
+progress is measured by improvement over time
+parents receive clear weekly insights
+3. Target Users
+Primary Users
+Students (high school / early university)
+learning coding, AI, emerging tech
+Secondary Users
+Teachers / Mentors
+Parents
+4. Core Product Principles
+
+This is important—you’ll use this to make decisions later.
+
+Learning = Doing
+→ every concept leads to a project
+Feedback > Grades
+→ no static scoring system
+Progress Over Time
+→ improvement is the main metric
+AI Assists, Humans Guide
+→ not replacing teachers, amplifying them
+5. Core Features
+
+Now let’s define what actually exists in the product.
+
+5.1 Authentication & Roles
+Roles:
+Student
+Teacher
+Parent
+Admin
+5.2 Student Experience
+Dashboard
+current courses
+active projects
+progress overview
+Learning Flow
+Concept (short + focused)
+Mini-task
+Project
+Project Workspace
+code editor / submission area
+instructions
+AI assistant
+Feedback System
+AI-generated feedback
+teacher comments
+iteration history
+5.3 Teacher Experience
+Dashboard
+student list
+flagged submissions
+progress trends
+Review System
+view student work
+add feedback
+approve or request revision
+5.4 Parent Experience
+Weekly Reports
+progress summary
+strengths
+areas to improve
+activity level
+5.5 AI Features
+
+Now be precise—AI must have defined roles.
+
+AI Tutor
+explains concepts
+answers student questions
+AI Evaluator
+reviews submissions
+gives structured feedback:
+correctness
+clarity
+improvement suggestions
+AI Progress Analyzer
+compares past vs current work
+detects improvement trends
+AI Report Generator
+writes weekly summaries for parents
+6. Functional Requirements
+
+Let’s define actual system behavior.
+
+6.1 Course System
+teachers/admin create courses
+each course has:
+modules
+lessons
+projects
+6.2 Project Submission
+student submits:
+code / file / text
+system stores versions
+triggers AI feedback
+6.3 Feedback Loop
+
+After submission:
+
+AI generates feedback
+student revises
+teacher optionally reviews
+progress updated
+6.4 Progress Tracking
+
+System must track:
+
+skill level (per topic)
+number of revisions
+project complexity
+consistency (activity frequency)
+6.5 Weekly Report Generation
+
+Automatically every 7 days:
+
+aggregate activity
+analyze improvement
+generate report
+send to parent
+7. Non-Functional Requirements
+
+This is where most people are vague—don’t be.
+
+Performance
+feedback response < 5 seconds (AI)
+page load < 2 seconds
+Scalability
+support 10K+ concurrent users
+modular services
+Security
+role-based access control
+encrypted user data
+Reliability
+no data loss on submissions
+version history maintained
+8. Data Model (High-Level)
+
+Core entities:
+
+User
+Course
+Module
+Project
+Submission
+Feedback
+Progress
+Report
+
+Relationships:
+
+user → enrolls in course
+course → contains modules → contains projects
+project → has submissions
+submission → has feedback
+progress → linked to student over time
+9. User Flow (End-to-End)
+
+Let’s walk one student:
+
+signs up
+enrolls in course
+learns concept
+works on project
+submits work
+receives AI feedback
+improves and resubmits
+system tracks progress
+parent receives weekly report
+
+That loop is your entire product.
+
+10. Success Metrics
+
+If you don’t define this, you won’t know if it works.
+
+Learning Metrics
+improvement rate over time
+number of revisions per project
+completion rate
+Engagement Metrics
+daily active users
+session time
+Quality Metrics
+feedback usefulness (user rating)
+parent satisfaction
+11. MVP Scope (be strict here)
+
+If you try everything at once, you won’t ship.
+
+Start with:
+
+student + teacher roles
+course + project system
+submission + AI feedback
+basic progress tracking
+simple weekly report
+
+Skip for now:
+
+advanced analytics
+gamification
+multi-language support (add later)
+12. Risks & Challenges
+
+Be honest:
+
+AI feedback quality may be inconsistent
+progress measurement is hard to define
+too much complexity early can slow development
+teachers may resist relying on AI

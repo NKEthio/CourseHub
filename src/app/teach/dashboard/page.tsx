@@ -5,7 +5,7 @@
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { BarChart, BookCopy, DollarSign, Edit, Loader2, MessageSquare, PlusCircle, Settings, Users, AlertCircle } from 'lucide-react';
+import { BarChart, BookCopy, DollarSign, Edit, Loader2, MessageSquare, PlusCircle, Settings, Users, AlertCircle, ClipboardList, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 import { onAuthStateChanged, getUserProfile, type UserRole } from "@/lib/firebase/auth";
 import { db } from "@/lib/firebase/firebase";
@@ -17,9 +17,12 @@ import { useRouter } from "next/navigation";
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
-interface AppUser extends FirebaseAuthUser {
+interface AppUser {
+  uid: string;
+  email: string | null;
   role?: UserRole;
   displayName?: string | null;
+  photoURL?: string | null;
 }
 
 interface CourseWithId extends Course {
@@ -49,7 +52,7 @@ export default function TeacherDashboardPage() {
       if (firebaseUser) {
         const profile = await getUserProfile(firebaseUser.uid);
         if (profile && profile.role === 'teacher') {
-          setCurrentUser({ uid: firebaseUser.uid, ...profile } as AppUser);
+          setCurrentUser({ ...profile } as AppUser);
         } else {
           toast({ variant: "destructive", title: "Access Denied", description: "You must be a teacher to view this page." });
           router.push('/teach');
@@ -67,6 +70,7 @@ export default function TeacherDashboardPage() {
     if (!currentUser || authLoading) return;
 
     const fetchCourses = async () => {
+      if (!db) return;
       setCoursesLoading(true);
       setCoursesError(null);
       try {
@@ -214,13 +218,35 @@ export default function TeacherDashboardPage() {
 
         <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle>Performance Overview</CardTitle>
-            <CardDescription>Key metrics for your courses.</CardDescription>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5 text-primary" />
+              Progress Trends
+            </CardTitle>
+            <CardDescription>See how your students are improving.</CardDescription>
           </CardHeader>
           <CardContent>
              <div className="border-2 border-dashed border-border rounded-md p-8 text-center text-muted-foreground h-60 flex flex-col justify-center items-center">
                 <BarChart className="mx-auto h-12 w-12 mb-4" />
-                <p>Performance chart coming soon.</p>
+                <p>Improvement analytics coming soon.</p>
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+
+      {/* Student Submissions */}
+      <section>
+        <Card className="shadow-lg">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <ClipboardList className="h-5 w-5 text-primary" />
+              Flagged Submissions
+            </CardTitle>
+            <CardDescription>Review student work that requires your attention.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="border-2 border-dashed border-border rounded-md p-12 text-center text-muted-foreground">
+              <p className="text-xl mb-2">No submissions flagged for review.</p>
+              <p>AI is currently handling initial feedback for all active projects.</p>
             </div>
           </CardContent>
         </Card>
@@ -230,7 +256,10 @@ export default function TeacherDashboardPage() {
       <section>
         <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <MessageSquare className="h-5 w-5 text-primary" />
+              Recent Activity
+            </CardTitle>
             <CardDescription>Latest enrollments, reviews, and messages.</CardDescription>
           </CardHeader>
           <CardContent>
