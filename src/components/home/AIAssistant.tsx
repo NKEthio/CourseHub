@@ -9,6 +9,8 @@ import { Loader2, Sparkles, BrainCircuit } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { generalQA, type GeneralQAOutput } from '@/ai/flows/general-qa';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { collection, getDocs, query, where, limit, type Firestore } from 'firebase/firestore';
+import { db } from '@/lib/firebase/firebase';
 
 export default function AIAssistant() {
   const { toast } = useToast();
@@ -16,6 +18,27 @@ export default function AIAssistant() {
   const [isLoading, setIsLoading] = React.useState(false);
   const [answer, setAnswer] = React.useState<string | null>(null);
   const [hasSearched, setHasSearched] = React.useState(false);
+  const [availableCourses, setAvailableCourses] = React.useState<{title: string, description: string}[]>([]);
+
+  React.useEffect(() => {
+    const fetchAvailableCourses = async () => {
+      if (!db) return;
+      try {
+        const coursesRef = collection(db as Firestore, 'courses');
+        const q = query(coursesRef, where('status', '==', 'published'), limit(10));
+        const querySnapshot = await getDocs(q);
+        const courses = querySnapshot.docs.map(doc => ({
+          title: doc.data().title,
+          description: doc.data().shortDescription || doc.data().description || '',
+        }));
+        setAvailableCourses(courses);
+      } catch (error) {
+        console.error('Error fetching courses for AI context:', error);
+      }
+    };
+
+    fetchAvailableCourses();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -33,7 +56,10 @@ export default function AIAssistant() {
     setAnswer(null);
 
     try {
-      const result = await generalQA({ query: question });
+      const result = await generalQA({
+        query: question,
+        availableCourses: availableCourses.length > 0 ? availableCourses : undefined
+      });
       setAnswer(result.answer);
     } catch (error) {
       console.error('AI assistant error:', error);
