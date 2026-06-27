@@ -9,14 +9,18 @@ import { Loader2, Send, CheckCircle2, AlertCircle } from 'lucide-react';
 import { evaluateSubmission, type EvaluateSubmissionOutput } from '@/ai/flows/evaluate-submission';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { auth, db } from '@/lib/firebase/firebase';
+import { doc, setDoc, collection, serverTimestamp, arrayUnion } from 'firebase/firestore';
+import type { Submission, Feedback } from '@/types/submission';
 
 interface ProjectSubmissionProps {
   projectId: string;
+  courseId: string;
   projectTitle: string;
   projectInstructions: string;
 }
 
-export default function ProjectSubmission({ projectId, projectTitle, projectInstructions }: ProjectSubmissionProps) {
+export default function ProjectSubmission({ projectId, courseId, projectTitle, projectInstructions }: ProjectSubmissionProps) {
   const [content, setContent] = React.useState('');
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [feedback, setFeedback] = React.useState<EvaluateSubmissionOutput | null>(null);
@@ -34,6 +38,46 @@ export default function ProjectSubmission({ projectId, projectTitle, projectInst
         submissionContent: content,
       });
       setFeedback(result);
+
+      // Save to Firestore if user is logged in
+      const user = auth?.currentUser;
+      if (user && db) {
+        const submissionRef = doc(collection(db, "submissions"));
+        const submissionId = submissionRef.id;
+
+        const feedbackData: Feedback = {
+          submissionId,
+          reviewerId: 'ai',
+          reviewerName: 'AI Evaluator',
+          content: result.feedback,
+          correctness: result.correctness,
+          clarity: result.clarity,
+          suggestions: result.suggestions,
+          createdAt: new Date().toISOString(),
+        };
+
+        const submissionData: Submission = {
+          id: submissionId,
+          projectId,
+          courseId,
+          studentId: user.uid,
+          content: content,
+          version: 1, // Simplified for now
+          status: result.correctness >= 70 ? 'approved' : 'needs-revision',
+          feedback: [feedbackData],
+          createdAt: serverTimestamp() as any,
+          updatedAt: serverTimestamp() as any,
+        };
+
+        await setDoc(submissionRef, submissionData);
+
+        // Update progress
+        const progressRef = doc(db, "users", user.uid, "progress", courseId);
+        await setDoc(progressRef, {
+          completedProjects: arrayUnion(projectId),
+          lastActivityAt: serverTimestamp(),
+        }, { merge: true });
+      }
     } catch (err) {
       console.error("Error submitting project:", err);
       setError("Failed to get AI feedback. Please try again.");
