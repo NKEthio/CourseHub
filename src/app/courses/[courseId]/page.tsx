@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertCircle, ArrowLeft, BookOpen, CalendarDays, DollarSign, Film, Info, ListChecks, Loader2, User, CheckCircle, BarChart3, UserPlus, Users, Star, MessageSquare, Send } from "lucide-react";
+import { AlertCircle, ArrowLeft, BookOpen, CalendarDays, DollarSign, Film, Info, ListChecks, Loader2, User, CheckCircle, BarChart3, UserPlus, Users, Star, MessageSquare, Send, PlayCircle } from "lucide-react";
 import { onAuthStateChanged, type User as FirebaseAuthUser } from "firebase/auth";
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
@@ -506,10 +506,19 @@ export default function CourseDetailPage() {
                  {course.price && course.price > 0 && <CardDescription>One-time payment</CardDescription>}
             </CardHeader>
             <CardContent className="space-y-4">
-              <Button size="lg" className="w-full" onClick={handleEnroll} disabled={isEnrolled || isCheckingEnrollment || isEnrolling || !currentUser}>
-                {isEnrolling || isCheckingEnrollment ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : (isEnrolled ? <CheckCircle className="mr-2 h-4 w-4"/> : <UserPlus className="mr-2 h-4 w-4" />)}
-                {enrollButtonText()}
-              </Button>
+              {isEnrolled ? (
+                <Button size="lg" className="w-full" asChild>
+                  <Link href={`/courses/${courseId}/learn`}>
+                    <PlayCircle className="mr-2 h-4 w-4" />
+                    Start Learning
+                  </Link>
+                </Button>
+              ) : (
+                <Button size="lg" className="w-full" onClick={handleEnroll} disabled={isCheckingEnrollment || isEnrolling || !currentUser}>
+                  {isEnrolling || isCheckingEnrollment ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UserPlus className="mr-2 h-4 w-4" />}
+                  {enrollButtonText()}
+                </Button>
+              )}
                {!currentUser && !isAuthLoading && (
                 <p className="text-xs text-center text-muted-foreground">
                   <Link href={`/auth/login?redirect=/courses/${courseId}`} className="underline hover:text-primary">Log in</Link> or <Link href={`/auth/register?redirect=/courses/${courseId}`} className="underline hover:text-primary">Sign up</Link> to enroll.
