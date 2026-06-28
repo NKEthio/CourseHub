@@ -67,7 +67,7 @@ export default function LoginPage() {
     <div className="flex items-center justify-center min-h-[calc(100vh-10rem)] py-12">
       <Card className="w-full max-w-md shadow-xl">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Login to CourseHub</CardTitle>
+          <CardTitle className="text-2xl font-bold">Login to EduVerse</CardTitle>
           <CardDescription>Enter your email and password to access your account.</CardDescription>
         </CardHeader>
         <CardContent>

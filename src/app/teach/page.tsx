@@ -58,7 +58,7 @@ export default function TeachPage() {
               Welcome Back, {currentUser?.displayName || 'Teacher'}!
             </h1>
             <p className="text-lg md:text-xl text-foreground/80 mb-8 max-w-3xl mx-auto">
-              Manage your courses, engage with students, and continue inspiring learners on CourseHub.
+              Manage your courses, engage with students, and continue inspiring learners on EduVerse.
             </p>
             <Button asChild size="lg" variant="default">
               <Link href="/teach/dashboard">
@@ -72,7 +72,7 @@ export default function TeachPage() {
               Share Your Expertise with the World
             </h1>
             <p className="text-lg md:text-xl text-foreground/80 mb-8 max-w-3xl mx-auto">
-              Become an instructor on CourseHub and empower learners globally. Create engaging courses, build your community, and earn by sharing your passion.
+              Become an instructor on EduVerse and empower learners globally. Create engaging courses, build your community, and earn by sharing your passion.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button asChild size="lg" variant="default">
@@ -102,7 +102,7 @@ export default function TeachPage() {
           />
         </div>
         <div className="space-y-6">
-          <h2 className="text-3xl font-bold text-primary">Why Teach on CourseHub?</h2>
+          <h2 className="text-3xl font-bold text-primary">Why Teach on EduVerse?</h2>
           <div className="flex items-start gap-4">
             <BookOpenText className="h-8 w-8 text-accent flex-shrink-0 mt-1" />
             <div>

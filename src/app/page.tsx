@@ -77,7 +77,7 @@ export default function HomePage() {
       <section className="text-center py-20 md:py-28 bg-card border border-border rounded-xl shadow-xl"> {/* Enhanced hero styling */}
         <div className="container mx-auto px-4">
           <h1 className="text-4xl md:text-6xl font-extrabold text-primary mb-6 leading-tight">
-            Welcome to CourseHub
+            Welcome to EduVerse
           </h1>
           <p className="text-lg md:text-xl text-foreground/80 mb-10 max-w-2xl mx-auto">
             Your journey to knowledge starts here. Explore a vast library of courses taught by industry experts.
@@ -112,7 +112,7 @@ export default function HomePage() {
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-primary mb-6">Become an Instructor</h2>
           <p className="text-lg text-foreground/80 mb-8 max-w-xl mx-auto">
-            Share your knowledge and expertise with thousands of students. Create your course on CourseHub today!
+            Share your knowledge and expertise with thousands of students. Create your course on EduVerse today!
           </p>
           <Button asChild size="lg" variant="outline" className="text-lg px-8 py-6 shadow hover:shadow-md transition-shadow">
             <Link href="/teach/apply"> {/* Assuming /teach/apply, adjust if different */}
@@ -135,7 +135,7 @@ export default function HomePage() {
           />
         </div>
         <div className="space-y-6">
-          <h2 className="text-3xl font-bold text-primary">Why Teach on CourseHub?</h2>
+          <h2 className="text-3xl font-bold text-primary">Why Teach on EduVerse?</h2>
           <p className="text-lg text-muted-foreground">
             Join a vibrant community, reach a global audience, and make a real impact. We provide the tools and support you need to succeed.
           </p>
