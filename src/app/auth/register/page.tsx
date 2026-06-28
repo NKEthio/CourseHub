@@ -75,7 +75,7 @@ export default function RegisterPage() {
     } else if (user) {
       toast({
         title: "Registration Successful",
-        description: `Welcome to CourseHub, ${data.displayName}! Your account has been created.`,
+        description: `Welcome to EduVerse, ${data.displayName}! Your account has been created.`,
       });
       router.push("/"); // Redirect to homepage
     }
@@ -85,7 +85,7 @@ export default function RegisterPage() {
     <div className="flex items-center justify-center min-h-[calc(100vh-10rem)] py-12">
       <Card className="w-full max-w-md shadow-xl">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Create your CourseHub Account</CardTitle>
+          <CardTitle className="text-2xl font-bold">Create your EduVerse Account</CardTitle>
           <CardDescription>Join our learning community. It&apos;s quick and easy!</CardDescription>
         </CardHeader>
         <CardContent>

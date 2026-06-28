@@ -13,6 +13,10 @@ import {z} from 'genkit';
 
 const GeneralQAInputSchema = z.object({
   query: z.string().describe('The user\'s question.'),
+  availableCourses: z.array(z.object({
+    title: z.string(),
+    description: z.string(),
+  })).optional().describe('A list of available courses on the platform to help provide better context and recommendations.'),
 });
 export type GeneralQAInput = z.infer<typeof GeneralQAInputSchema>;
 
@@ -32,6 +36,15 @@ const prompt = ai.definePrompt({
   output: {schema: GeneralQAOutputSchema},
   prompt: `You are a helpful AI assistant on an e-learning platform called EduVerse.
   A user will ask you a question. Your task is to provide a clear, concise, and helpful answer.
+
+  {{#if availableCourses}}
+  Here are some of the courses currently available on EduVerse:
+  {{#each availableCourses}}
+  - {{this.title}}: {{this.description}}
+  {{/each}}
+
+  If the user's question is about learning something new or finding a course, please try to recommend one or more of these courses if they are relevant.
+  {{/if}}
 
   User's question: "{{query}}"`,
 });

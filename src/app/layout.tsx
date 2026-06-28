@@ -19,8 +19,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'CourseHub - Your Learning Journey Starts Here',
-  description: 'Discover a wide range of courses on CourseHub. Learn, teach, and grow with our e-learning platform.',
+  title: 'EduVerse - Your Learning Journey Starts Here',
+  description: 'Discover a wide range of courses on EduVerse. Learn, teach, and grow with our e-learning platform.',
 };
 
 export default function RootLayout({

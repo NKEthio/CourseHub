@@ -1,4 +1,4 @@
-# **App Name**: CourseHub
+# **App Name**: EduVerse
 
 ## Core Features:
 

@@ -35,8 +35,8 @@ export default function BlogPage() {
 
   return (
     <BlogLayout
-      title="CourseHub Blog"
-      description="Stay updated with the latest news, articles, and insights from the CourseHub team and community."
+      title="EduVerse Blog"
+      description="Stay updated with the latest news, articles, and insights from the EduVerse team and community."
     >
       {isLoading && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
