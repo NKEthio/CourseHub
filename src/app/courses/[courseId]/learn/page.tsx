@@ -40,6 +40,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import ProjectSubmission from "@/components/project/ProjectSubmission";
+import StudyBuddy from "@/components/course/StudyBuddy";
 import { cn } from "@/lib/utils";
 
 type ContentItem = {
@@ -248,7 +249,7 @@ export default function LearnPage() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto relative">
         {activeItem ? (
           <div className="max-w-4xl mx-auto p-8 space-y-8">
             <div className="space-y-2">
@@ -321,6 +322,13 @@ export default function LearnPage() {
                 />
               </div>
             )}
+
+            {/* Study Buddy AI Integration */}
+            <StudyBuddy
+              key={activeItem.id}
+              lessonTitle={activeItem.title}
+              lessonContent={activeItem.type === 'lesson' ? (activeItem.content || '') : (activeItem.instructions || '')}
+            />
           </div>
         ) : (
           <div className="flex h-full items-center justify-center text-muted-foreground">
