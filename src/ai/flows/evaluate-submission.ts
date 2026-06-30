@@ -7,6 +7,7 @@ const EvaluateSubmissionInputSchema = z.object({
   projectTitle: z.string(),
   projectInstructions: z.string(),
   submissionContent: z.string(),
+  previousFeedback: z.string().optional().describe('Feedback from the previous submission, if any.'),
 });
 
 export type EvaluateSubmissionInput = z.infer<typeof EvaluateSubmissionInputSchema>;
@@ -34,6 +35,14 @@ const prompt = ai.definePrompt({
   Project: {{projectTitle}}
   Instructions: {{projectInstructions}}
   Student Submission: {{submissionContent}}
+
+  {{#if previousFeedback}}
+  PREVIOUS FEEDBACK:
+  """
+  {{previousFeedback}}
+  """
+  Please evaluate if the student has addressed the issues raised in the previous feedback and highlight their improvement.
+  {{/if}}
 
   Analyze the submission for:
   1. Correctness: How well it follows instructions and meets goals.
