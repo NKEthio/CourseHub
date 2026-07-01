@@ -14,6 +14,7 @@ export interface Progress {
   completedLessons: string[]; // lessonIds
   completedProjects: string[]; // projectIds
   revisionsCount: Record<string, number>; // projectId -> count
+  quizScores?: Record<string, number>; // lessonId -> score
   lastActivityAt: Timestamp | string;
   overallCompletion: number; // 0-100
 }

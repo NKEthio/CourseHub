@@ -41,6 +41,8 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import ProjectSubmission from "@/components/project/ProjectSubmission";
 import StudyBuddy from "@/components/course/StudyBuddy";
+import LessonQuiz from "@/components/course/LessonQuiz";
+import SuggestedReadings from "@/components/course/SuggestedReadings";
 import { cn } from "@/lib/utils";
 
 type ContentItem = {
@@ -168,23 +170,35 @@ export default function LearnPage() {
 
   const activeItem = items.find(i => i.id === activeItemId);
 
-  const handleMarkAsComplete = async () => {
+  const handleMarkAsComplete = async (quizScore?: number) => {
     if (!currentUser || !activeItem || activeItem.type !== 'lesson' || !db) return;
 
     const progressRef = doc(db, "users", currentUser.uid, "progress", courseId);
     const updatedCompletedLessons = [...(progress?.completedLessons || [])];
-    if (!updatedCompletedLessons.includes(activeItem.id)) {
+    const isNewCompletion = !updatedCompletedLessons.includes(activeItem.id);
+
+    if (isNewCompletion) {
       updatedCompletedLessons.push(activeItem.id);
+    }
 
-      const overallCompletion = Math.round((updatedCompletedLessons.length + (progress?.completedProjects?.length || 0)) / items.length * 100);
+    const overallCompletion = Math.round((updatedCompletedLessons.length + (progress?.completedProjects?.length || 0)) / items.length * 100);
 
-      await setDoc(progressRef, {
-        completedLessons: updatedCompletedLessons,
-        overallCompletion,
-        lastActivityAt: serverTimestamp()
-      }, { merge: true });
+    const updateData: any = {
+      completedLessons: updatedCompletedLessons,
+      overallCompletion,
+      lastActivityAt: serverTimestamp()
+    };
 
+    if (quizScore !== undefined) {
+      updateData[`quizScores.${activeItem.id}`] = quizScore;
+    }
+
+    await setDoc(progressRef, updateData, { merge: true });
+
+    if (isNewCompletion) {
       toast({ title: "Lesson Completed!", description: "Progress updated." });
+    } else if (quizScore !== undefined) {
+      toast({ title: "Quiz Completed!", description: `You scored ${quizScore}%!` });
     }
   };
 
@@ -276,6 +290,29 @@ export default function LearnPage() {
                 <div className="prose dark:prose-invert max-w-none">
                   {activeItem.content}
                 </div>
+
+                <Separator />
+
+                <div className="grid md:grid-cols-2 gap-8">
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-bold">Knowledge Check</h3>
+                    <LessonQuiz
+                      lessonId={activeItem.id}
+                      lessonTitle={activeItem.title}
+                      lessonContent={activeItem.content || ''}
+                      onComplete={(score) => handleMarkAsComplete(score)}
+                    />
+                  </div>
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-bold">Further Reading</h3>
+                    <SuggestedReadings
+                      lessonTitle={activeItem.title}
+                      lessonContent={activeItem.content || ''}
+                      courseTitle={course?.title || ''}
+                    />
+                  </div>
+                </div>
+
                 <div className="pt-8 border-t flex justify-end">
                   <div className="flex gap-4">
                     <Button
