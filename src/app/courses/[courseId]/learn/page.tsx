@@ -41,6 +41,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import ProjectSubmission from "@/components/project/ProjectSubmission";
 import StudyBuddy from "@/components/course/StudyBuddy";
+import SuggestedReadings from "@/components/course/SuggestedReadings";
 import { cn } from "@/lib/utils";
 
 type ContentItem = {
@@ -276,6 +277,14 @@ export default function LearnPage() {
                 <div className="prose dark:prose-invert max-w-none">
                   {activeItem.content}
                 </div>
+
+                {/* Suggested Readings AI Integration */}
+                <SuggestedReadings
+                  courseTitle={course?.title || ""}
+                  lessonTitle={activeItem.title}
+                  lessonContent={activeItem.content || ""}
+                />
+
                 <div className="pt-8 border-t flex justify-end">
                   <div className="flex gap-4">
                     <Button
