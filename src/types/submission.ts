@@ -1,6 +1,11 @@
 
 import type { Timestamp } from 'firebase/firestore';
 
+export interface SkillImprovement {
+  skillName: string;
+  points: number;
+}
+
 export interface Feedback {
   id?: string;
   submissionId: string;
@@ -10,6 +15,7 @@ export interface Feedback {
   correctness: number; // 0-100
   clarity: number; // 0-100
   suggestions: string[];
+  skillImprovements?: SkillImprovement[];
   createdAt: Timestamp | string;
 }
 

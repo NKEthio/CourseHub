@@ -5,12 +5,12 @@ import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Send, CheckCircle2, AlertCircle, History } from 'lucide-react';
+import { Loader2, Send, CheckCircle2, AlertCircle, History, Star } from 'lucide-react';
 import { evaluateSubmission, type EvaluateSubmissionOutput } from '@/ai/flows/evaluate-submission';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { auth, db } from '@/lib/firebase/firebase';
-import { doc, setDoc, collection, serverTimestamp, arrayUnion, query, where, orderBy, getDocs, updateDoc, increment } from 'firebase/firestore';
+import { doc, setDoc, collection, serverTimestamp, arrayUnion, query, where, orderBy, getDocs, updateDoc, increment, getDoc } from 'firebase/firestore';
 import type { Submission, Feedback } from '@/types/submission';
 import {
   Accordion,
@@ -59,6 +59,7 @@ export default function ProjectSubmission({ projectId, courseId, projectTitle, p
                 clarity: lastAiFeedback.clarity,
                 feedback: lastAiFeedback.content,
                 suggestions: lastAiFeedback.suggestions,
+                skillImprovements: lastAiFeedback.skillImprovements,
               });
             }
           }
@@ -107,6 +108,7 @@ export default function ProjectSubmission({ projectId, courseId, projectTitle, p
           correctness: result.correctness,
           clarity: result.clarity,
           suggestions: result.suggestions,
+          skillImprovements: result.skillImprovements,
           createdAt: new Date().toISOString(),
         };
 
@@ -130,8 +132,10 @@ export default function ProjectSubmission({ projectId, courseId, projectTitle, p
 
         // Update progress
         const progressRef = doc(db, "users", user.uid, "progress", courseId);
+        const progressSnap = await getDoc(progressRef);
+        const currentProgress = progressSnap.exists() ? progressSnap.data() : null;
 
-        const baseUpdateData: any = {
+        const baseUpdateData: Record<string, any> = {
           lastActivityAt: serverTimestamp(),
         };
 
@@ -139,8 +143,30 @@ export default function ProjectSubmission({ projectId, courseId, projectTitle, p
           baseUpdateData.completedProjects = arrayUnion(projectId);
         }
 
+        // Update skills
+        if (result.skillImprovements && result.skillImprovements.length > 0) {
+          const currentSkills: { skillName: string; level: number }[] = currentProgress?.skills || [];
+          const updatedSkills = [...currentSkills];
+
+          result.skillImprovements.forEach((improvement) => {
+            const skillIndex = updatedSkills.findIndex((s) => s.skillName === improvement.skillName);
+            if (skillIndex !== -1) {
+              updatedSkills[skillIndex] = {
+                ...updatedSkills[skillIndex],
+                level: Math.min(100, updatedSkills[skillIndex].level + improvement.points)
+              };
+            } else {
+              updatedSkills.push({
+                skillName: improvement.skillName,
+                level: Math.min(100, improvement.points)
+              });
+            }
+          });
+          baseUpdateData.skills = updatedSkills;
+        }
+
         try {
-          const updateObj = { ...baseUpdateData };
+          const updateObj: Record<string, any> = { ...baseUpdateData };
           if (nextVersion > 1) {
             updateObj[`revisionsCount.${projectId}`] = increment(1);
           }
@@ -215,6 +241,16 @@ export default function ProjectSubmission({ projectId, courseId, projectTitle, p
                           </div>
                         </div>
                         <p className="text-sm text-foreground/80">{f.content}</p>
+                        {f.skillImprovements && f.skillImprovements.length > 0 && (
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            {f.skillImprovements.map((si, siIdx) => (
+                              <Badge key={siIdx} variant="secondary" className="bg-yellow-500/10 text-yellow-600 border-yellow-500/20 text-[10px]">
+                                <Star className="h-3 w-3 mr-1 fill-yellow-500" />
+                                {si.skillName} +{si.points}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </AccordionContent>
@@ -298,6 +334,23 @@ export default function ProjectSubmission({ projectId, courseId, projectTitle, p
               <h4 className="text-base font-semibold">Evaluation</h4>
               <p className="text-foreground/80 leading-relaxed">{feedback.feedback}</p>
             </div>
+
+            {feedback.skillImprovements && feedback.skillImprovements.length > 0 && (
+              <div className="space-y-3">
+                <h4 className="text-base font-semibold">Skills Improved</h4>
+                <div className="flex flex-wrap gap-3">
+                  {feedback.skillImprovements.map((skill, index) => (
+                    <div key={index} className="flex items-center gap-2 bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 px-3 py-1.5 rounded-full border border-yellow-500/20">
+                      <Star className="h-4 w-4 fill-yellow-500 text-yellow-500" />
+                      <span className="text-sm font-bold">{skill.skillName}</span>
+                      <Badge variant="outline" className="bg-yellow-500 text-white border-none h-5 px-1.5 min-w-[20px] flex justify-center font-bold">
+                        +{skill.points}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {feedback.suggestions.length > 0 && (
               <div className="space-y-3">
