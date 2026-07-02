@@ -17,6 +17,10 @@ const EvaluateSubmissionOutputSchema = z.object({
   clarity: z.number().min(0).max(100),
   feedback: z.string(),
   suggestions: z.array(z.string()),
+  skillImprovements: z.array(z.object({
+    skillName: z.string(),
+    improvement: z.number().describe('Points added to this skill, typically 1-10'),
+  })).optional(),
 });
 
 export type EvaluateSubmissionOutput = z.infer<typeof EvaluateSubmissionOutputSchema>;
@@ -48,6 +52,16 @@ const prompt = ai.definePrompt({
   1. Correctness: How well it follows instructions and meets goals.
   2. Clarity: How well-explained or well-structured the work is.
   3. Improvement: Provide actionable suggestions for growth.
+  4. Skill Gains: Based on the complexity and quality of the work, identify 1-3 skills the student demonstrated and assign an improvement score (1-10 points) for each.
+
+  Please use consistent skill names. Preferred skill names include:
+  - "Logic & Algorithms"
+  - "Code Quality"
+  - "Problem Solving"
+  - "User Interface"
+  - "Data Handling"
+  - "Security"
+  - "Communication"
 
   Be encouraging but precise.`,
 });

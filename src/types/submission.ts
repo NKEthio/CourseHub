@@ -10,6 +10,10 @@ export interface Feedback {
   correctness: number; // 0-100
   clarity: number; // 0-100
   suggestions: string[];
+  skillImprovements?: {
+    skillName: string;
+    improvement: number;
+  }[];
   createdAt: Timestamp | string;
 }
 
