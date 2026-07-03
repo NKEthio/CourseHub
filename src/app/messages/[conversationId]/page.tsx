@@ -19,6 +19,7 @@ import type { Conversation, Message, ParticipantDetail } from "@/types/messaging
 import { ArrowLeft, Send, User, Loader2, AlertCircle, LogIn } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { sendMessage } from "@/lib/firebase/messaging";
 
 export default function ConversationPage() {
   const params = useParams();
@@ -34,9 +35,10 @@ export default function ConversationPage() {
   const [isLoadingMessages, setIsLoadingMessages] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
 
-  // For sending new messages (to be implemented)
-  // const [newMessage, setNewMessage] = React.useState("");
-  // const [isSending, setIsSending] = React.useState(false);
+  const [newMessage, setNewMessage] = React.useState("");
+  const [isSending, setIsSending] = React.useState(false);
+
+  const scrollAreaRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
@@ -106,6 +108,31 @@ export default function ConversationPage() {
 
     return () => unsubscribeMessages();
   }, [conversation, isLoadingConversation]);
+
+  React.useEffect(() => {
+    if (scrollAreaRef.current) {
+        const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
+        if (scrollContainer) {
+            scrollContainer.scrollTop = scrollContainer.scrollHeight;
+        }
+    }
+  }, [messages]);
+
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!currentUser || !conversationId || !newMessage.trim() || isSending) return;
+
+    setIsSending(true);
+    try {
+      await sendMessage(conversationId, currentUser.uid, newMessage.trim());
+      setNewMessage("");
+    } catch (err) {
+      console.error("Error sending message:", err);
+      // Maybe show a toast error here
+    } finally {
+      setIsSending(false);
+    }
+  };
 
   const getParticipantDetails = (senderId: string): ParticipantDetail | undefined => {
     return conversation?.participantDetails.find(p => p.userId === senderId);
@@ -205,7 +232,7 @@ export default function ConversationPage() {
         </h2>
       </header>
 
-      <ScrollArea className="flex-1 p-3 sm:p-4 bg-background">
+      <ScrollArea className="flex-1 p-3 sm:p-4 bg-background" ref={scrollAreaRef}>
         <div className="space-y-4">
           {isLoadingMessages && messages.length === 0 && (
             <>
@@ -267,33 +294,26 @@ export default function ConversationPage() {
 
       <footer className="p-3 sm:p-4 border-t sticky bottom-0 bg-card shadow-sm">
         <form 
-          // onSubmit={handleSendMessage} 
+          onSubmit={handleSendMessage}
           className="flex items-center space-x-2"
         >
           <Input
             type="text"
-            // value={newMessage}
-            // onChange={(e) => setNewMessage(e.target.value)}
-            placeholder="Type a message... (Sending disabled)"
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            placeholder="Type a message..."
             className="flex-1"
             autoComplete="off"
-            disabled // Sending not implemented yet
+            disabled={isSending}
           />
           <Button type="submit" 
-            // disabled={isSending || !newMessage.trim()}
-            disabled // Sending not implemented yet
+            disabled={isSending || !newMessage.trim()}
             >
-            {/* {isSending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />} */}
-            <Send className="h-4 w-4" />
+            {isSending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
             <span className="sr-only">Send</span>
           </Button>
         </form>
       </footer>
-        <div className="p-4 bg-blue-50 border-t border-blue-200 text-sm text-blue-700 dark:bg-blue-900/20 dark:border-blue-700 dark:text-blue-300">
-          <AlertCircle className="inline h-4 w-4 mr-1.5 relative -top-px" />
-          This is a basic messaging interface. Functionality to send messages is not yet implemented.
-          Currently, loading real conversations from the database is partially implemented for display.
-        </div>
     </div>
   );
 }

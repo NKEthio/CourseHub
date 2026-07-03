@@ -23,6 +23,7 @@ import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { errorEmitter } from "@/firebase/error-emitter";
 import { FirestorePermissionError } from "@/firebase/errors";
+import { getOrCreateConversation } from "@/lib/firebase/messaging";
 
 export default function CourseDetailPage() {
   const params = useParams();
@@ -42,6 +43,7 @@ export default function CourseDetailPage() {
   const [isEnrolled, setIsEnrolled] = React.useState(false);
   const [isCheckingEnrollment, setIsCheckingEnrollment] = React.useState(true);
   const [isEnrolling, setIsEnrolling] = React.useState(false);
+  const [isStartingChat, setIsStartingChat] = React.useState(false);
 
   const [isLoadingReviews, setIsLoadingReviews] = React.useState(true);
   const [userHasReviewed, setUserHasReviewed] = React.useState(false);
@@ -176,6 +178,32 @@ export default function CourseDetailPage() {
     checkEnrollment();
   }, [currentUser, courseId, isLoading, isAuthLoading, toast]);
 
+
+  const handleMessageTeacher = async () => {
+    if (!currentUser || !course || isStartingChat) return;
+
+    setIsStartingChat(true);
+    try {
+      const conversationId = await getOrCreateConversation(
+        {
+          uid: currentUser.uid,
+          displayName: userProfile?.displayName || currentUser.displayName || currentUser.email,
+          photoURL: userProfile?.photoURL || currentUser.photoURL
+        },
+        {
+          uid: course.teacherId,
+          displayName: course.teacherName,
+          photoURL: null
+        }
+      );
+      router.push(`/messages/${conversationId}`);
+    } catch (err) {
+      console.error("Error starting conversation:", err);
+      toast({ variant: "destructive", title: "Error", description: "Failed to start a conversation with the teacher." });
+    } finally {
+      setIsStartingChat(false);
+    }
+  };
 
   const handleEnroll = async () => {
     if (!currentUser) {
@@ -507,12 +535,18 @@ export default function CourseDetailPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               {isEnrolled ? (
-                <Button size="lg" className="w-full" asChild>
-                  <Link href={`/courses/${courseId}/learn`}>
-                    <PlayCircle className="mr-2 h-4 w-4" />
-                    Start Learning
-                  </Link>
-                </Button>
+                <div className="space-y-3">
+                  <Button size="lg" className="w-full" asChild>
+                    <Link href={`/courses/${courseId}/learn`}>
+                      <PlayCircle className="mr-2 h-4 w-4" />
+                      Start Learning
+                    </Link>
+                  </Button>
+                  <Button variant="outline" size="lg" className="w-full" onClick={handleMessageTeacher} disabled={isStartingChat}>
+                    {isStartingChat ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <MessageSquare className="mr-2 h-4 w-4" />}
+                    Message Teacher
+                  </Button>
+                </div>
               ) : (
                 <Button size="lg" className="w-full" onClick={handleEnroll} disabled={isCheckingEnrollment || isEnrolling || !currentUser}>
                   {isEnrolling || isCheckingEnrollment ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UserPlus className="mr-2 h-4 w-4" />}
