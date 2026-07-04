@@ -46,6 +46,7 @@ export default function TeacherDashboardPage() {
   const [coursesLoading, setCoursesLoading] = React.useState(true);
   const [coursesError, setCoursesError] = React.useState<string | null>(null);
   const [stats, setStats] = React.useState(dashboardStats);
+  const [pendingSubmissionsCount, setPendingSubmissionsCount] = React.useState(0);
 
   React.useEffect(() => {
     const unsubscribe = onAuthStateChanged(async (firebaseUser) => {
@@ -87,11 +88,30 @@ export default function TeacherDashboardPage() {
         });
         setCourses(fetchedCourses);
 
+        // Fetch pending submissions for these courses
+        if (fetchedCourses.length > 0) {
+          const courseIds = fetchedCourses.map(c => c.id);
+          const submissionsRef = collection(db, "submissions");
+
+          // Note: In our system, AI initially marks things as 'needs-revision' if they are not approved yet.
+          // Or we can just count all that are NOT 'approved'
+          // chunking might be needed if courseIds.length > 30
+          const qPending = query(
+            submissionsRef,
+            where("courseId", "in", courseIds),
+            where("status", "!=", "approved")
+          );
+
+          const pendingSnap = await getDocs(qPending);
+          setPendingSubmissionsCount(pendingSnap.size);
+        }
+
         // Update dashboard stats based on fetched courses
         const publishedCourses = fetchedCourses.filter(c => c.status === 'published').length;
-        setStats(prevStats => prevStats.map(stat => 
-            stat.title === 'Active Courses' ? {...stat, value: publishedCourses.toString()} : stat
-        ));
+        setStats(prevStats => prevStats.map(stat => {
+          if (stat.title === 'Active Courses') return {...stat, value: publishedCourses.toString()};
+          return stat;
+        }));
 
       } catch (err) {
         console.error("Error fetching courses: ", err);
@@ -103,6 +123,13 @@ export default function TeacherDashboardPage() {
 
     fetchCourses();
   }, [currentUser, authLoading]);
+
+  React.useEffect(() => {
+    setStats(prevStats => prevStats.map(stat => {
+        if (stat.title === 'Pending Reviews') return {...stat, value: pendingSubmissionsCount.toString()};
+        return stat;
+      }));
+  }, [pendingSubmissionsCount]);
 
   if (authLoading) {
     return (
@@ -237,17 +264,36 @@ export default function TeacherDashboardPage() {
       <section>
         <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <ClipboardList className="h-5 w-5 text-primary" />
-              Flagged Submissions
-            </CardTitle>
-            <CardDescription>Review student work that requires your attention.</CardDescription>
+            <div className="flex justify-between items-center">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <ClipboardList className="h-5 w-5 text-primary" />
+                  Student Submissions
+                </CardTitle>
+                <CardDescription>Review student work that requires your attention.</CardDescription>
+              </div>
+              <Button asChild variant="outline">
+                <Link href="/teach/submissions">View All</Link>
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="border-2 border-dashed border-border rounded-md p-12 text-center text-muted-foreground">
-              <p className="text-xl mb-2">No submissions flagged for review.</p>
-              <p>AI is currently handling initial feedback for all active projects.</p>
-            </div>
+            {pendingSubmissionsCount > 0 ? (
+              <div className="bg-primary/5 p-6 rounded-md text-center border border-primary/10">
+                <p className="text-xl font-semibold text-primary mb-2">You have {pendingSubmissionsCount} submissions waiting for review.</p>
+                <p className="text-muted-foreground mb-4">Provide expert guidance to help your students improve their projects.</p>
+                <Button asChild>
+                  <Link href="/teach/submissions">
+                    Go to Review Queue
+                  </Link>
+                </Button>
+              </div>
+            ) : (
+              <div className="border-2 border-dashed border-border rounded-md p-12 text-center text-muted-foreground">
+                <p className="text-xl mb-2">No submissions flagged for review.</p>
+                <p>AI is currently handling initial feedback for all active projects.</p>
+              </div>
+            )}
           </CardContent>
         </Card>
       </section>
