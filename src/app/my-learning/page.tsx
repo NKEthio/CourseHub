@@ -16,6 +16,7 @@ import type { Course, UserEnrolledCourse } from "@/types/course";
 import type { Progress as ProgressType, SkillLevel } from "@/types/progress";
 import type { Submission } from "@/types/submission";
 import CourseCard, { type CourseCardProps } from "@/components/course/CourseCard";
+import StudentInsights from "@/components/course/StudentInsights";
 import { BookOpen, LogIn, Search, AlertCircle, LayoutDashboard, Code, TrendingUp, CheckCircle2, Clock, MessageSquare } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
@@ -266,6 +267,17 @@ export default function StudentDashboardPage() {
           Welcome back, {currentUser.displayName || currentUser.email}! Here are your courses, progress, and activity.
         </p>
       </header>
+
+      <StudentInsights
+        studentName={currentUser.displayName || currentUser.email || 'Student'}
+        recentActivity={recentActivity.map(a => ({
+          type: a.type,
+          title: a.title,
+          description: a.description,
+          status: a.status
+        }))}
+        skills={aggregatedSkills}
+      />
 
       <section>
         {isLoadingCourses && (
