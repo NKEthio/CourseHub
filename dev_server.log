@@ -1,0 +1,60 @@
+
+> nextn@0.1.0 dev
+> next dev -p 3000
+
+   ▲ Next.js 15.2.8
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.0.2:3000
+
+ ✓ Starting...
+Attention: Next.js now collects completely anonymous telemetry regarding usage.
+This information is used to shape Next.js' roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+https://nextjs.org/telemetry
+
+ ✓ Ready in 2s
+ ○ Compiling /teach/courses/[courseId]/edit ...
+ ✓ Compiled /teach/courses/[courseId]/edit in 14.5s (1267 modules)
+ ✓ Compiled in 1515ms (489 modules)
+CRITICAL: Firebase configuration is incomplete or invalid in .env.local. Missing or empty for: apiKey, authDomain, projectId. Please check your .env.local file and ensure it's loaded correctly. Firebase services will NOT be available.
+ GET /teach/courses/test-course/edit 200 in 18543ms
+ ○ Compiling /auth/login ...
+ ⚠ ./node_modules/handlebars/lib/index.js
+require.extensions is not supported by webpack. Use a loader instead.
+
+Import trace for requested module:
+./node_modules/handlebars/lib/index.js
+./node_modules/dotprompt/dist/index.js
+./node_modules/@genkit-ai/core/lib/registry.js
+./node_modules/genkit/lib/registry.js
+./node_modules/genkit/lib/genkit.js
+./node_modules/genkit/lib/index.mjs
+./src/ai/flows/evaluate-submission.ts
+
+./node_modules/handlebars/lib/index.js
+require.extensions is not supported by webpack. Use a loader instead.
+
+Import trace for requested module:
+./node_modules/handlebars/lib/index.js
+./node_modules/dotprompt/dist/index.js
+./node_modules/@genkit-ai/core/lib/registry.js
+./node_modules/genkit/lib/registry.js
+./node_modules/genkit/lib/genkit.js
+./node_modules/genkit/lib/index.mjs
+./src/ai/flows/evaluate-submission.ts
+
+./node_modules/handlebars/lib/index.js
+require.extensions is not supported by webpack. Use a loader instead.
+
+Import trace for requested module:
+./node_modules/handlebars/lib/index.js
+./node_modules/dotprompt/dist/index.js
+./node_modules/@genkit-ai/core/lib/registry.js
+./node_modules/genkit/lib/registry.js
+./node_modules/genkit/lib/genkit.js
+./node_modules/genkit/lib/index.mjs
+./src/ai/flows/evaluate-submission.ts
+ GET /auth/login 200 in 16051ms
+CRITICAL: Firebase configuration is incomplete or invalid in .env.local. Missing or empty for: apiKey, authDomain, projectId. Please check your .env.local file and ensure it's loaded correctly. Firebase services will NOT be available.
+ GET /courses/test-course/learn 200 in 16602ms
+ GET /auth/login?redirect=%2Fcourses%2Ftest-course%2Flearn 200 in 27ms

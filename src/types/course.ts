@@ -10,6 +10,7 @@ export interface QuizQuestion {
   questionText: string;
   options: QuizOption[];
   correctOptionIndex: number; // Index of the correct option in the options array
+  timestamp?: number; // Optional: specific second in the video to trigger this question
 }
 
 export interface Project {
