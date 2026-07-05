@@ -61,6 +61,7 @@ const quizQuestionSchema = z.object({
   questionText: z.string().min(1, "Question text cannot be empty."),
   options: z.array(quizOptionSchema).min(2, "Each question must have at least two options."),
   correctOptionIndex: z.coerce.number({invalid_type_error: "A correct option must be selected."}).min(0, "A correct option must be selected."),
+  timestamp: z.coerce.number().min(0, "Timestamp cannot be negative").optional(),
 }).refine(data => data.correctOptionIndex < data.options.length, {
   message: "Selected correct option index is out of bounds. This usually means an option was deleted after being selected as correct.",
   path: ["correctOptionIndex"],
@@ -210,6 +211,7 @@ export default function EditCoursePage() {
         questionText: q.questionText,
         options: q.options.map(opt => ({ text: opt.text })),
         correctOptionIndex: q.correctOptionIndex,
+        timestamp: q.timestamp,
       })) || [];
     } else {
       lessonData.passingGrade = undefined;
@@ -354,10 +356,23 @@ export default function EditCoursePage() {
                             <h4 className="text-md font-semibold pt-2">Quiz Questions</h4>
                             {quizQuestionFields.map((questionField, questionIndex) => (
                               <Card key={questionField.id} className="p-4 bg-background shadow-md">
-                                <FormField control={lessonForm.control} name={`quizQuestions.${questionIndex}.questionText`} render={({ field }) => (
-                                  <FormItem><FormLabel>Question {questionIndex + 1}</FormLabel><FormControl><Textarea placeholder="Enter question text" {...field} rows={2}/></FormControl><FormMessage /></FormItem>)} />
+                                <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-4">
+                                  <div className="sm:col-span-3">
+                                    <FormField control={lessonForm.control} name={`quizQuestions.${questionIndex}.questionText`} render={({ field }) => (
+                                      <FormItem><FormLabel>Question {questionIndex + 1}</FormLabel><FormControl><Textarea placeholder="Enter question text" {...field} rows={2}/></FormControl><FormMessage /></FormItem>)} />
+                                  </div>
+                                  <div className="sm:col-span-1">
+                                    <FormField control={lessonForm.control} name={`quizQuestions.${questionIndex}.timestamp`} render={({ field }) => (
+                                      <FormItem>
+                                        <FormLabel>Time (sec)</FormLabel>
+                                        <FormControl><Input type="number" placeholder="0" {...field} /></FormControl>
+                                        <FormDescription className="text-[10px]">When to show</FormDescription>
+                                        <FormMessage />
+                                      </FormItem>)} />
+                                  </div>
+                                </div>
                                 
-                                <FormLabel className="mt-3 mb-1 block text-sm font-medium">Options & Correct Answer</FormLabel>
+                                <FormLabel className="mt-1 mb-1 block text-sm font-medium">Options & Correct Answer</FormLabel>
                                 <Controller
                                   control={lessonForm.control}
                                   name={`quizQuestions.${questionIndex}.correctOptionIndex`}

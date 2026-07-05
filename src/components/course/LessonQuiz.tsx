@@ -18,10 +18,11 @@ interface LessonQuizProps {
   lessonTitle: string;
   lessonContent: string;
   onComplete: (score: number) => void;
+  initialQuiz?: QuizQuestion[];
 }
 
-export default function LessonQuiz({ lessonId, lessonTitle, lessonContent, onComplete }: LessonQuizProps) {
-  const [quiz, setQuiz] = React.useState<QuizQuestion[] | null>(null);
+export default function LessonQuiz({ lessonId, lessonTitle, lessonContent, onComplete, initialQuiz }: LessonQuizProps) {
+  const [quiz, setQuiz] = React.useState<QuizQuestion[] | null>(initialQuiz || null);
   const [isLoading, setIsLoading] = React.useState(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = React.useState(0);
   const [selectedOption, setSelectedOption] = React.useState<number | null>(null);

@@ -19,7 +19,7 @@ import {
 import { db, auth } from "@/lib/firebase/firebase";
 import { onAuthStateChanged } from "@/lib/firebase/auth";
 import type { User as FirebaseAuthUser } from "firebase/auth";
-import type { Course, Lesson, Project } from "@/types/course";
+import type { Course, Lesson, Project, QuizQuestion } from "@/types/course";
 import type { Progress } from "@/types/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -53,6 +53,7 @@ type ContentItem = {
   videoUrl?: string;
   instructions?: string;
   order: number;
+  quiz?: QuizQuestion[];
 };
 
 export default function LearnPage() {
@@ -68,8 +69,20 @@ export default function LearnPage() {
   const [progress, setProgress] = React.useState<Progress | null>(null);
 
   const [isLoading, setIsLoading] = React.useState(true);
+  const [player, setPlayer] = React.useState<any>(null);
+  const [activeVideoQuestion, setActiveVideoQuestion] = React.useState<QuizQuestion | null>(null);
+  const [answeredTimestamps, setAnsweredTimestamps] = React.useState<number[]>([]);
   const [isEnrolled, setIsEnrolled] = React.useState(false);
   const [currentUser, setCurrentUser] = React.useState<any>(null);
+
+  const activeItem = items.find(i => i.id === activeItemId);
+
+  // Reset player and answered timestamps when active item changes
+  React.useEffect(() => {
+    setPlayer(null);
+    setAnsweredTimestamps([]);
+    setActiveVideoQuestion(null);
+  }, [activeItemId]);
 
   // Auth & Enrollment Check
   React.useEffect(() => {
@@ -112,6 +125,45 @@ export default function LearnPage() {
     return () => unsubscribe();
   }, [courseId, router, toast]);
 
+  // Load YouTube API
+  React.useEffect(() => {
+    if (typeof window !== "undefined" && !(window as any).YT) {
+      const tag = document.createElement("script");
+      tag.src = "https://www.youtube.com/iframe_api";
+      const firstScriptTag = document.getElementsByTagName("script")[0];
+      firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+
+      (window as any).onYouTubeIframeAPIReady = () => {
+        console.log("YouTube API Ready");
+      };
+    }
+  }, []);
+
+  // Monitor Video Playback for Questions
+  React.useEffect(() => {
+    if (!player || !activeItem?.quiz || activeItem.type !== 'lesson') return;
+
+    const interval = setInterval(() => {
+      if (player.getPlayerState() === 1) { // 1 = playing
+        const currentTime = player.getCurrentTime();
+
+        // Find a question that should be triggered at this time
+        const questionToTrigger = activeItem.quiz?.find(q =>
+          q.timestamp !== undefined &&
+          Math.floor(currentTime) === q.timestamp &&
+          !answeredTimestamps.includes(q.timestamp)
+        );
+
+        if (questionToTrigger) {
+          player.pauseVideo();
+          setActiveVideoQuestion(questionToTrigger);
+        }
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [player, activeItem, answeredTimestamps]);
+
   // Fetch Course Data
   React.useEffect(() => {
     if (!isEnrolled || !db) return;
@@ -133,7 +185,8 @@ export default function LearnPage() {
               title: data.title,
               content: data.content,
               videoUrl: data.videoUrl,
-              order: data.order
+              order: data.order,
+              quiz: data.quiz
             };
           });
 
@@ -167,8 +220,6 @@ export default function LearnPage() {
 
     fetchData();
   }, [courseId, isEnrolled, toast]);
-
-  const activeItem = items.find(i => i.id === activeItemId);
 
   const handleMarkAsComplete = async (quizScore?: number) => {
     if (!currentUser || !activeItem || activeItem.type !== 'lesson' || !db) return;
@@ -276,15 +327,31 @@ export default function LearnPage() {
             {activeItem.type === 'lesson' ? (
               <div className="space-y-6">
                 {activeItem.videoUrl && (
-                  <div className="aspect-video rounded-xl overflow-hidden shadow-lg bg-black">
-                     <iframe
-                      className="w-full h-full"
-                      src={`https://www.youtube.com/embed/${activeItem.videoUrl.split('v=')[1]?.split('&')[0] || activeItem.videoUrl.split('/').pop()}`}
-                      title="YouTube video player"
-                      frameBorder="0"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                    ></iframe>
+                  <div className="aspect-video rounded-xl overflow-hidden shadow-lg bg-black relative">
+                     <div id="youtube-player" className="w-full h-full"></div>
+                     <VideoPlayerInitializer
+                        videoUrl={activeItem.videoUrl}
+                        onReady={(p) => setPlayer(p)}
+                      />
+                      {activeVideoQuestion && (
+                        <div className="absolute inset-0 z-50 bg-black/80 flex items-center justify-center p-4 overflow-y-auto">
+                          <div className="w-full max-w-lg">
+                            <LessonQuiz
+                              lessonId={activeItem.id}
+                              lessonTitle={activeItem.title}
+                              lessonContent={activeItem.content || ''}
+                              initialQuiz={[activeVideoQuestion]}
+                              onComplete={() => {
+                                if (activeVideoQuestion.timestamp !== undefined) {
+                                  setAnsweredTimestamps(prev => [...prev, activeVideoQuestion.timestamp!]);
+                                }
+                                setActiveVideoQuestion(null);
+                                player?.playVideo();
+                              }}
+                            />
+                          </div>
+                        </div>
+                      )}
                   </div>
                 )}
                 <div className="prose dark:prose-invert max-w-none">
@@ -375,4 +442,35 @@ export default function LearnPage() {
       </main>
     </div>
   );
+}
+
+function VideoPlayerInitializer({ videoUrl, onReady }: { videoUrl: string, onReady: (player: any) => void }) {
+  const videoId = videoUrl.split('v=')[1]?.split('&')[0] || videoUrl.split('/').pop();
+
+  React.useEffect(() => {
+    let internalPlayer: any;
+
+    const initPlayer = () => {
+      if ((window as any).YT && (window as any).YT.Player) {
+        internalPlayer = new (window as any).YT.Player('youtube-player', {
+          videoId: videoId,
+          events: {
+            onReady: (event: any) => onReady(event.target),
+          },
+        });
+      } else {
+        setTimeout(initPlayer, 100);
+      }
+    };
+
+    initPlayer();
+
+    return () => {
+      if (internalPlayer && internalPlayer.destroy) {
+        internalPlayer.destroy();
+      }
+    };
+  }, [videoId, onReady]);
+
+  return null;
 }
