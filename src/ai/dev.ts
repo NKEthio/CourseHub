@@ -3,3 +3,4 @@ config();
 
 import '@/ai/flows/suggest-readings.ts';
 import '@/ai/flows/general-qa.ts';
+import '@/ai/flows/generate-student-insights.ts';
