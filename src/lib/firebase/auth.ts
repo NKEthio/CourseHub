@@ -22,6 +22,7 @@ export interface UserProfile {
   displayName: string | null;
   role: UserRole;
   photoURL?: string | null;
+  childrenIds?: string[];
   createdAt?: Timestamp;
 }
 
