@@ -1,7 +1,7 @@
 'use server';
 
-import { ai } from '@/ai/genkit';
-import { z } from 'genkit';
+// GenKit disabled / reserved for further improvement
+import { z } from 'zod';
 
 const MessageSchema = z.object({
   role: z.enum(['user', 'assistant']),
@@ -24,45 +24,8 @@ const LessonTutorOutputSchema = z.object({
 export type LessonTutorOutput = z.infer<typeof LessonTutorOutputSchema>;
 
 export async function lessonTutor(input: LessonTutorInput): Promise<LessonTutorOutput> {
-  return lessonTutorFlow(input);
+  // GenKit disabled / reserved for further improvement
+  return {
+    answer: `Regarding "${input.lessonTitle}": Here is a tip to help answer your question: review the main concepts in the lesson material for guidance on "${input.query}".`,
+  };
 }
-
-const prompt = ai.definePrompt({
-  name: 'lessonTutorPrompt',
-  input: { schema: LessonTutorInputSchema },
-  output: { schema: LessonTutorOutputSchema },
-  prompt: `You are a helpful and encouraging AI Study Buddy on EduVerse.
-  Your goal is to help students understand the current lesson material without just giving them the direct answers if it's a project or task.
-
-  CURRENT LESSON: {{lessonTitle}}
-  LESSON CONTENT:
-  """
-  {{lessonContent}}
-  """
-
-  {{#if history}}
-  CONVERSATION HISTORY:
-  {{#each history}}
-  - {{this.role}}: {{this.content}}
-  {{/each}}
-  {{/if}}
-
-  Student's Question: "{{query}}"
-
-  Provide a clear, helpful, and contextual response that refers back to the lesson content when appropriate.`,
-});
-
-const lessonTutorFlow = ai.defineFlow(
-  {
-    name: 'lessonTutorFlow',
-    inputSchema: LessonTutorInputSchema,
-    outputSchema: LessonTutorOutputSchema,
-  },
-  async (input) => {
-    const { output } = await prompt(input);
-    if (!output) {
-      throw new Error('Failed to generate tutor response');
-    }
-    return output;
-  }
-);

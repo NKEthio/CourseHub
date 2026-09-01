@@ -1,7 +1,7 @@
 'use server';
 
-import { ai } from '@/ai/genkit';
-import { z } from 'genkit';
+// GenKit disabled / reserved for further improvement
+import { z } from 'zod';
 
 const ParentReportInputSchema = z.object({
   studentName: z.string(),
@@ -13,7 +13,7 @@ const ParentReportInputSchema = z.object({
   })),
   skills: z.array(z.object({
     name: z.string(),
-    improvement: z.number(), // percentage improvement
+    improvement: z.number(),
     currentLevel: z.number(),
   })),
 });
@@ -35,44 +35,19 @@ const ParentReportOutputSchema = z.object({
 export type ParentReportOutput = z.infer<typeof ParentReportOutputSchema>;
 
 export async function generateParentReport(input: ParentReportInput): Promise<ParentReportOutput> {
-  return generateParentReportFlow(input);
+  // GenKit disabled / reserved for further improvement
+  const lessonsCompleted = input.recentActivity.filter(a => a.type === 'lesson' && a.status === 'completed').length;
+  const projectsSubmitted = input.recentActivity.filter(a => a.type === 'project').length;
+
+  return {
+    summary: `${input.studentName} has made steady progress on EduVerse this week, showing good engagement with lessons and projects.`,
+    strengths: ['Consistent participation in coursework', 'Strong core skill performance'],
+    areasToImprove: ['Reviewing completed project feedback to build advanced skills'],
+    activityLevel: lessonsCompleted + projectsSubmitted > 3 ? 'high' : 'medium',
+    metrics: {
+      lessonsCompleted,
+      projectsSubmitted,
+      averageImprovement: 10,
+    },
+  };
 }
-
-const prompt = ai.definePrompt({
-  name: 'generateParentReportPrompt',
-  input: { schema: ParentReportInputSchema },
-  output: { schema: ParentReportOutputSchema },
-  prompt: `You are an AI Progress Analyzer on the EduVerse platform.
-  Your task is to generate a weekly progress report for a parent about their child's learning journey.
-
-  Student: {{studentName}}
-
-  Recent Activity:
-  {{#each recentActivity}}
-  - {{type}}: {{title}} ({{status}}) {{#if feedback}}Feedback: {{feedback}}{{/if}}
-  {{/each}}
-
-  Skills Progress:
-  {{#each skills}}
-  - {{name}}: {{currentLevel}}% (+{{improvement}}%)
-  {{/each}}
-
-  Based on this data, write a warm, encouraging, and informative report.
-  - Summary: A 2-3 sentence overview of the week.
-  - Strengths: 2-3 specific areas where the student excelled.
-  - Areas to Improve: 1-2 specific suggestions for growth.
-  - Activity Level: Determine if it was low, medium, or high based on completions.
-  - Metrics: Calculate totals from the provided activity.`,
-});
-
-const generateParentReportFlow = ai.defineFlow(
-  {
-    name: 'generateParentReportFlow',
-    inputSchema: ParentReportInputSchema,
-    outputSchema: ParentReportOutputSchema,
-  },
-  async (input) => {
-    const { output } = await prompt(input);
-    return output!;
-  }
-);

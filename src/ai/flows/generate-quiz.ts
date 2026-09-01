@@ -2,10 +2,10 @@
 
 /**
  * @fileOverview An AI flow that generates a quiz for a given lesson.
+ * GenKit disabled / reserved for further improvement.
  */
 
-import { ai } from '@/ai/genkit';
-import { z } from 'genkit';
+import { z } from 'zod';
 
 const QuizOptionSchema = z.object({
   text: z.string().describe('The text of the option.'),
@@ -29,33 +29,19 @@ const GenerateQuizOutputSchema = z.object({
 export type GenerateQuizInput = z.infer<typeof GenerateQuizInputSchema>;
 export type GenerateQuizOutput = z.infer<typeof GenerateQuizOutputSchema>;
 
-const quizPrompt = ai.definePrompt({
-  name: 'generateQuizPrompt',
-  input: { schema: GenerateQuizInputSchema },
-  output: { schema: GenerateQuizOutputSchema },
-  prompt: `You are an educational AI assistant that creates high-quality multiple-choice quizzes for students.
-
-  Based on the following lesson content, generate a quiz with 3 to 5 questions that test the student's understanding of the key concepts.
-
-  Each question should have 3 or 4 options, and only one correct answer.
-
-  Lesson Title: {{{lessonTitle}}}
-  Lesson Content: {{{lessonContent}}}
-
-  Ensure the questions vary in difficulty and cover different aspects of the lesson.`,
-});
-
-export const generateQuiz = ai.defineFlow(
-  {
-    name: 'generateQuiz',
-    inputSchema: GenerateQuizInputSchema,
-    outputSchema: GenerateQuizOutputSchema,
-  },
-  async (input) => {
-    const { output } = await quizPrompt(input);
-    if (!output) {
-      throw new Error('Failed to generate quiz');
-    }
-    return output;
-  }
-);
+export async function generateQuiz(input: GenerateQuizInput): Promise<GenerateQuizOutput> {
+  // GenKit disabled / reserved for further improvement
+  return {
+    quiz: [
+      {
+        questionText: `What is the key takeaway of "${input.lessonTitle}"?`,
+        options: [
+          { text: 'Understanding core principles and practice' },
+          { text: 'Memorizing definitions without applying them' },
+          { text: 'Skipping exercise questions' },
+        ],
+        correctOptionIndex: 0,
+      },
+    ],
+  };
+}
