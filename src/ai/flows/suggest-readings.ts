@@ -2,14 +2,10 @@
 
 /**
  * @fileOverview An AI agent that suggests relevant readings for a given lesson.
- *
- * - suggestReadings - A function that suggests readings for a lesson.
- * - SuggestReadingsInput - The input type for the suggestReadings function.
- * - SuggestReadingsOutput - The return type for the suggestReadings function.
+ * GenKit disabled / reserved for further improvement.
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import { z } from 'zod';
 
 const SuggestReadingsInputSchema = z.object({
   lessonTitle: z.string().describe('The title of the lesson.'),
@@ -26,30 +22,11 @@ const SuggestReadingsOutputSchema = z.object({
 export type SuggestReadingsOutput = z.infer<typeof SuggestReadingsOutputSchema>;
 
 export async function suggestReadings(input: SuggestReadingsInput): Promise<SuggestReadingsOutput> {
-  return suggestReadingsFlow(input);
+  // GenKit disabled / reserved for further improvement
+  return {
+    suggestedReadings: [
+      `Supplementary overview for ${input.lessonTitle}`,
+      `Practice resources and reference documentation for ${input.courseTitle}`,
+    ],
+  };
 }
-
-const prompt = ai.definePrompt({
-  name: 'suggestReadingsPrompt',
-  input: {schema: SuggestReadingsInputSchema},
-  output: {schema: SuggestReadingsOutputSchema},
-  prompt: `You are an AI assistant that suggests relevant readings (articles, videos, etc.) to complement a given lesson.
-
-  Course Title: {{{courseTitle}}}
-  Lesson Title: {{{lessonTitle}}}
-  Lesson Content: {{{lessonContent}}}
-
-  Please provide a list of suggested readings that would help the student deepen their understanding of the material.`,
-});
-
-const suggestReadingsFlow = ai.defineFlow(
-  {
-    name: 'suggestReadingsFlow',
-    inputSchema: SuggestReadingsInputSchema,
-    outputSchema: SuggestReadingsOutputSchema,
-  },
-  async input => {
-    const {output} = await prompt(input);
-    return output!;
-  }
-);

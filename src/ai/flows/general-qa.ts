@@ -2,14 +2,10 @@
 
 /**
  * @fileOverview A general purpose Q&A agent.
- *
- * - generalQA - A function that answers a user's question.
- * - GeneralQAInput - The input type for the generalQA function.
- * - GeneralQAOutput - The return type for the generalQA function.
+ * GenKit disabled / reserved for further improvement.
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import { z } from 'zod';
 
 const GeneralQAInputSchema = z.object({
   query: z.string().describe('The user\'s question.'),
@@ -25,38 +21,11 @@ const GeneralQAOutputSchema = z.object({
 });
 export type GeneralQAOutput = z.infer<typeof GeneralQAOutputSchema>;
 
-
 export async function generalQA(input: GeneralQAInput): Promise<GeneralQAOutput> {
-  return generalQAFlow(input);
-}
-
-const prompt = ai.definePrompt({
-  name: 'generalQAPrompt',
-  input: {schema: GeneralQAInputSchema},
-  output: {schema: GeneralQAOutputSchema},
-  prompt: `You are a helpful AI assistant on an e-learning platform called EduVerse.
-  A user will ask you a question. Your task is to provide a clear, concise, and helpful answer.
-
-  {{#if availableCourses}}
-  Here are some of the courses currently available on EduVerse:
-  {{#each availableCourses}}
-  - {{this.title}}: {{this.description}}
-  {{/each}}
-
-  If the user's question is about learning something new or finding a course, please try to recommend one or more of these courses if they are relevant.
-  {{/if}}
-
-  User's question: "{{query}}"`,
-});
-
-const generalQAFlow = ai.defineFlow(
-  {
-    name: 'generalQAFlow',
-    inputSchema: GeneralQAInputSchema,
-    outputSchema: GeneralQAOutputSchema,
-  },
-  async input => {
-    const {output} = await prompt(input);
-    return output!;
+  // GenKit disabled / reserved for further improvement
+  let responseText = `Thank you for asking: "${input.query}". EduVerse offers interactive courses and learning tracks to help you master new skills!`;
+  if (input.availableCourses && input.availableCourses.length > 0) {
+    responseText += ` Check out our featured course: ${input.availableCourses[0].title}.`;
   }
-);
+  return { answer: responseText };
+}

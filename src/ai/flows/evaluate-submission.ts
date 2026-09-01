@@ -1,7 +1,7 @@
 'use server';
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+// GenKit disabled / reserved for further improvement
+import { z } from 'zod';
 
 const EvaluateSubmissionInputSchema = z.object({
   projectTitle: z.string(),
@@ -26,45 +26,18 @@ const EvaluateSubmissionOutputSchema = z.object({
 export type EvaluateSubmissionOutput = z.infer<typeof EvaluateSubmissionOutputSchema>;
 
 export async function evaluateSubmission(input: EvaluateSubmissionInput): Promise<EvaluateSubmissionOutput> {
-  return evaluateSubmissionFlow(input);
+  // GenKit disabled / reserved for further improvement
+  return {
+    correctness: 85,
+    clarity: 90,
+    feedback: `Great work on "${input.projectTitle}"! Your submission demonstrates good structure and effort. Keep refining your work.`,
+    suggestions: [
+      'Double check edge cases in your implementation.',
+      'Enhance formatting and code comments for better readability.'
+    ],
+    skillImprovements: [
+      { skillName: 'Problem Solving', points: 5 },
+      { skillName: 'Code Quality', points: 5 }
+    ]
+  };
 }
-
-const prompt = ai.definePrompt({
-  name: 'evaluateSubmissionPrompt',
-  input: {schema: EvaluateSubmissionInputSchema},
-  output: {schema: EvaluateSubmissionOutputSchema},
-  prompt: `You are an AI Evaluator on the EduVerse platform.
-  Your role is to review student submissions and provide structured feedback.
-
-  Project: {{projectTitle}}
-  Instructions: {{projectInstructions}}
-  Student Submission: {{submissionContent}}
-
-  {{#if previousFeedback}}
-  PREVIOUS FEEDBACK:
-  """
-  {{previousFeedback}}
-  """
-  Please evaluate if the student has addressed the issues raised in the previous feedback and highlight their improvement.
-  {{/if}}
-
-  Analyze the submission for:
-  1. Correctness: How well it follows instructions and meets goals.
-  2. Clarity: How well-explained or well-structured the work is.
-  3. Improvement: Provide actionable suggestions for growth.
-  4. Skill Growth: Identify 1-3 specific skills (e.g., Logic, Syntax, Design, UI/UX, Documentation, Problem Solving) the student demonstrated or improved in this submission. Award 1-10 points per skill based on the quality and complexity.
-
-  Be encouraging but precise.`,
-});
-
-const evaluateSubmissionFlow = ai.defineFlow(
-  {
-    name: 'evaluateSubmissionFlow',
-    inputSchema: EvaluateSubmissionInputSchema,
-    outputSchema: EvaluateSubmissionOutputSchema,
-  },
-  async input => {
-    const {output} = await prompt(input);
-    return output!;
-  }
-);
